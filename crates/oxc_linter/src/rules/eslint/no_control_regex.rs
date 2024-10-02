@@ -92,25 +92,24 @@ impl Rule for NoControlRegex {
                         // get pattern from arguments. Missing or non-string arguments
                         // will be runtime errors, but are not covered by this rule.
                         let alloc = Allocator::default();
-                        let pattern_with_slashes = format!("/{}/", &pattern.value);
                         let flags = extract_regex_flags(&expr.arguments);
-                        let parser = Parser::new(
+                        let mut parser = Parser::new(
                             &alloc,
-                            pattern_with_slashes.as_str(),
+                            &pattern.value.as_str(),
                             ParserOptions {
                                 span_offset: expr
                                     .arguments
                                     .first()
                                     .map_or(0, |arg| arg.span().start),
-                                unicode_mode: flags
-                                    .is_some_and(|flags| flags.contains(RegExpFlags::U)),
+                                unicode_mode: flags.is_some_and(|flags| {
+                                    flags.intersects(RegExpFlags::U | RegExpFlags::V)
+                                }),
                                 unicode_sets_mode: flags
                                     .is_some_and(|flags| flags.contains(RegExpFlags::V)),
                             },
                         );
 
-                        let Some(pattern) = parser.parse().ok().map(|pattern| pattern.pattern)
-                        else {
+                        let Ok(pattern) = parser.parse() else {
                             return;
                         };
 
@@ -133,25 +132,24 @@ impl Rule for NoControlRegex {
                         // get pattern from arguments. Missing or non-string arguments
                         // will be runtime errors, but are not covered by this rule.
                         let alloc = Allocator::default();
-                        let pattern_with_slashes = format!("/{}/", &pattern.value);
                         let flags = extract_regex_flags(&expr.arguments);
-                        let parser = Parser::new(
+                        let mut parser = Parser::new(
                             &alloc,
-                            pattern_with_slashes.as_str(),
+                            &pattern.value.as_str(),
                             ParserOptions {
                                 span_offset: expr
                                     .arguments
                                     .first()
                                     .map_or(0, |arg| arg.span().start),
-                                unicode_mode: flags
-                                    .is_some_and(|flags| flags.contains(RegExpFlags::U)),
+                                unicode_mode: flags.is_some_and(|flags| {
+                                    flags.intersects(RegExpFlags::U | RegExpFlags::V)
+                                }),
                                 unicode_sets_mode: flags
                                     .is_some_and(|flags| flags.contains(RegExpFlags::V)),
                             },
                         );
 
-                        let Some(pattern) = parser.parse().ok().map(|pattern| pattern.pattern)
-                        else {
+                        let Ok(pattern) = parser.parse() else {
                             return;
                         };
 

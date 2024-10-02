@@ -105,11 +105,10 @@ impl NoRegexSpaces {
         }
 
         let alloc = Allocator::default();
-        let pattern_with_slashes = format!("/{}/", &pattern.value);
-        let parser = Parser::new(&alloc, pattern_with_slashes.as_str(), ParserOptions::default());
-        let regex = parser.parse().ok()?;
+        let mut parser = Parser::new(&alloc, pattern.value.as_str(), ParserOptions::default());
+        let parsed_pattern = parser.parse().ok()?;
 
-        find_consecutive_spaces(&regex.pattern)
+        find_consecutive_spaces(&parsed_pattern)
             .map(|span| Span::new(span.start + pattern.span.start, span.end + pattern.span.start))
     }
 

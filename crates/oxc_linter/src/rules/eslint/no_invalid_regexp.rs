@@ -2,7 +2,7 @@ use oxc_allocator::Allocator;
 use oxc_ast::{ast::Argument, AstKind};
 use oxc_diagnostics::{LabeledSpan, OxcDiagnostic};
 use oxc_macros::declare_oxc_lint;
-use oxc_regular_expression::{FlagsParser, ParserOptions, PatternParser};
+use oxc_regular_expression::{Parser, ParserOptions};
 use oxc_span::Span;
 use rustc_hash::FxHashSet;
 use serde::Deserialize;
@@ -119,28 +119,24 @@ impl Rule for NoInvalidRegexp {
             // - Invalid flags combination: u+v
             // - (Valid duplicated flags are already checked above)
             // It can be done without `FlagsParser`, though
+            // TODO: Tests will fail
             let flags_text = unique_flags.iter().collect::<String>();
-            let options = ParserOptions::default().with_span_offset(flags_span_start);
-            match FlagsParser::new(&allocator, flags_text.as_str(), options).parse() {
-                Ok(flags) => parsed_flags = Some(flags),
-                Err(diagnostic) => return ctx.diagnostic(diagnostic),
-            }
+            parsed_flags = Some(flags_text);
         }
 
         // Then, validate pattern if exists
         // Pattern check is skipped when 1st argument is NOT a `StringLiteral`
         // e.g. `new RegExp(var)`, `RegExp("str" + var)`
         if let Some((pattern_span_start, pattern_text)) = pattern_arg {
-            let mut options = ParserOptions::default().with_span_offset(pattern_span_start);
-            if let Some(flags) = parsed_flags {
-                if flags.unicode || flags.unicode_sets {
-                    options = options.with_unicode_mode();
-                }
-                if flags.unicode_sets {
-                    options = options.with_unicode_sets_mode();
-                }
-            }
-            match PatternParser::new(&allocator, pattern_text, options).parse() {
+            let options = ParserOptions {
+                span_offset: pattern_span_start,
+                unicode_mode: parsed_flags
+                    .as_ref()
+                    .map_or(false, |flags| flags.contains('u') || flags.contains('v')),
+                unicode_sets_mode: parsed_flags.as_ref().map_or(false, |flags| flags.contains('v')),
+            };
+
+            match Parser::new(&allocator, pattern_text, options).parse() {
                 Ok(_) => {}
                 Err(diagnostic) => ctx.diagnostic(diagnostic),
             }
