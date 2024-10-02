@@ -1,6 +1,6 @@
 use oxc_allocator::Allocator;
 use oxc_ast::{ast::Argument, AstKind};
-use oxc_diagnostics::{LabeledSpan, OxcDiagnostic};
+use oxc_diagnostics::OxcDiagnostic;
 use oxc_macros::declare_oxc_lint;
 use oxc_regular_expression::{Parser, ParserOptions};
 use oxc_span::Span;
@@ -8,6 +8,20 @@ use rustc_hash::FxHashSet;
 use serde::Deserialize;
 
 use crate::{context::LintContext, rule::Rule, AstNode};
+
+// Use the same prefix with `oxc_regular_expression` crate
+fn duplicated_flag_diagnostic(span: Span) -> OxcDiagnostic {
+    OxcDiagnostic::warn("Invalid regular expression: Duplicated flag").with_label(span)
+}
+
+fn unknown_flag_diagnostic(span: Span) -> OxcDiagnostic {
+    OxcDiagnostic::warn("Invalid regular expression: Unknown flag").with_label(span)
+}
+
+fn invalid_unicode_flags_diagnostic(span: Span) -> OxcDiagnostic {
+    OxcDiagnostic::warn("Invalid regular expression: `u` and `v` flags should be used alone")
+        .with_label(span)
+}
 
 #[derive(Debug, Default, Clone)]
 pub struct NoInvalidRegexp(Box<NoInvalidRegexpConfig>);
@@ -72,68 +86,53 @@ impl Rule for NoInvalidRegexp {
             return;
         }
 
-        let allocator = Allocator::default();
-
         // Validate flags first if exists
-        let mut parsed_flags = None;
+        let (mut u_flag_found, mut v_flag_found) = (false, false);
         if let Some((flags_span_start, flags_text)) = flags_arg {
-            // Check for duplicated flags
-            // For compatibility with ESLint, we need to check "user-defined duplicated" flags here
-            // "valid duplicated" flags are also checked
             let mut unique_flags = FxHashSet::default();
-            let mut violations = vec![];
             for (idx, ch) in flags_text.char_indices() {
-                if !unique_flags.insert(ch) {
-                    violations.push(idx);
-                }
-            }
-            if !violations.is_empty() {
-                return ctx.diagnostic(
-                    // Use the same prefix with `oxc_regular_expression`
-                    OxcDiagnostic::warn("Invalid regular expression: Duplicated flag").with_labels(
-                        violations
-                            .iter()
-                            .map(|&start| {
-                                #[allow(clippy::cast_possible_truncation)]
-                                let start = flags_span_start + start as u32;
-                                LabeledSpan::new_with_span(None, Span::new(start, start))
-                            })
-                            .collect::<Vec<_>>(),
-                    ),
-                );
-            }
+                #[allow(clippy::cast_possible_truncation)]
+                let start = flags_span_start + idx as u32;
 
-            // Omit user defined invalid flags
-            for flag in &self.0.allow_constructor_flags {
-                match flag {
-                    // Keep valid flags, even if they are defined
-                    'd' | 'g' | 'i' | 'm' | 's' | 'u' | 'v' | 'y' => continue,
-                    _ => {
-                        unique_flags.remove(flag);
+                // Invalid combination: u+v
+                if ch == 'u' {
+                    if v_flag_found {
+                        return ctx
+                            .diagnostic(invalid_unicode_flags_diagnostic(Span::new(start, start)));
                     }
+                    u_flag_found = true;
+                }
+                if ch == 'v' {
+                    if u_flag_found {
+                        return ctx
+                            .diagnostic(invalid_unicode_flags_diagnostic(Span::new(start, start)));
+                    }
+                    v_flag_found = true;
+                }
+
+                // Duplicated: user defined, invalid or valid
+                if !unique_flags.insert(ch) {
+                    return ctx.diagnostic(duplicated_flag_diagnostic(Span::new(start, start)));
+                }
+
+                // Unknown: not valid, not user defined
+                if !(matches!(ch, 'd' | 'g' | 'i' | 'm' | 's' | 'u' | 'v' | 'y')
+                    || self.0.allow_constructor_flags.contains(&ch))
+                {
+                    return ctx.diagnostic(unknown_flag_diagnostic(Span::new(start, start)));
                 }
             }
-
-            // Use parser to check:
-            // - Unknown invalid flags
-            // - Invalid flags combination: u+v
-            // - (Valid duplicated flags are already checked above)
-            // It can be done without `FlagsParser`, though
-            // TODO: Tests will fail
-            let flags_text = unique_flags.iter().collect::<String>();
-            parsed_flags = Some(flags_text);
         }
 
         // Then, validate pattern if exists
         // Pattern check is skipped when 1st argument is NOT a `StringLiteral`
         // e.g. `new RegExp(var)`, `RegExp("str" + var)`
+        let allocator = Allocator::default();
         if let Some((pattern_span_start, pattern_text)) = pattern_arg {
             let options = ParserOptions {
                 span_offset: pattern_span_start,
-                unicode_mode: parsed_flags
-                    .as_ref()
-                    .map_or(false, |flags| flags.contains('u') || flags.contains('v')),
-                unicode_sets_mode: parsed_flags.as_ref().map_or(false, |flags| flags.contains('v')),
+                unicode_mode: u_flag_found || v_flag_found,
+                unicode_sets_mode: v_flag_found,
             };
 
             match Parser::new(&allocator, pattern_text, options).parse() {

@@ -105,11 +105,14 @@ impl NoRegexSpaces {
         }
 
         let alloc = Allocator::default();
-        let mut parser = Parser::new(&alloc, pattern.value.as_str(), ParserOptions::default());
+        let mut parser = Parser::new(
+            &alloc,
+            pattern.value.as_str(),
+            ParserOptions { span_offset: pattern.span.start + 1, ..ParserOptions::default() },
+        );
         let parsed_pattern = parser.parse().ok()?;
 
         find_consecutive_spaces(&parsed_pattern)
-            .map(|span| Span::new(span.start + pattern.span.start, span.end + pattern.span.start))
     }
 
     fn is_regexp_new_expression(expr: &NewExpression<'_>) -> bool {
