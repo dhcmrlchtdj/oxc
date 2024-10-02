@@ -95,7 +95,7 @@ impl Rule for NoControlRegex {
                         let flags = extract_regex_flags(&expr.arguments);
                         let mut parser = Parser::new(
                             &alloc,
-                            &pattern.value.as_str(),
+                            pattern.value.as_str(),
                             ParserOptions {
                                 span_offset: expr
                                     .arguments
@@ -135,7 +135,7 @@ impl Rule for NoControlRegex {
                         let flags = extract_regex_flags(&expr.arguments);
                         let mut parser = Parser::new(
                             &alloc,
-                            &pattern.value.as_str(),
+                            pattern.value.as_str(),
                             ParserOptions {
                                 span_offset: expr
                                     .arguments
