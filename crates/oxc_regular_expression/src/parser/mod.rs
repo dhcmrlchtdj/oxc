@@ -11,7 +11,7 @@ pub use parser::Parser;
 mod test {
     use oxc_allocator::Allocator;
 
-    use crate::{ParserOptions, Parser};
+    use crate::{Parser, ParserOptions};
 
     #[test]
     fn should_pass() {
