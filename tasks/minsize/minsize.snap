@@ -20,7 +20,7 @@ Original   | Minified   | esbuild    | Gzip       | esbuild
 
 3.20 MB    | 1.05 MB    | 1.01 MB    | 334.05 kB  | 331.56 kB  | echarts.js
 
-4.12 MB    | 1.68 MB    | 2.31 MB    | 484.11 kB  | 488.28 kB  | antd.js   
+6.69 MB    | 2.44 MB    | 2.31 MB    | 498.80 kB  | 488.28 kB  | antd.js   
 
 10.95 MB   | 3.59 MB    | 3.49 MB    | 913.90 kB  | 915.50 kB  | typescript.js
 
