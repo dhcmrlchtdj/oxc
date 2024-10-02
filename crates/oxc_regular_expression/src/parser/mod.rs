@@ -9,8 +9,8 @@ pub use parser::Parser;
 
 #[cfg(test)]
 mod test {
-    use oxc_allocator::Allocator;
     use crate::{Parser, ParserOptions};
+    use oxc_allocator::Allocator;
 
     fn default() -> ParserOptions {
         ParserOptions::default()
