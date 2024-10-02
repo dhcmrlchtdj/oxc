@@ -1,11 +1,11 @@
-mod parser;
+mod parser_impl;
 mod reader;
 mod span_factory;
 mod state;
 mod unicode;
 mod unicode_property;
 
-pub use parser::Parser;
+pub use parser_impl::Parser;
 
 #[cfg(test)]
 mod test {
