@@ -6,6 +6,7 @@ pub struct ParserOptions {
     pub unicode_mode: bool,
     /// Extended Unicode mode(`v` flag) enabled or not.
     pub unicode_sets_mode: bool,
+    // TODO: Add `handle_escape_with_quote_type` like option to support `new RegExp("with \"escape\"")`
 }
 
 impl ParserOptions {

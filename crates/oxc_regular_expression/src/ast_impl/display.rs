@@ -7,37 +7,6 @@ use std::{
 use crate::ast::*;
 use crate::surrogate_pair::{combine_surrogate_pair, is_lead_surrogate, is_trail_surrogate};
 
-impl<'a> Display for RegularExpression<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "/{}/{}", self.pattern, self.flags)
-    }
-}
-
-impl Display for Flags {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut flags = String::with_capacity(8);
-
-        // write flags in the order they are described in the `MDN`
-        // <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions#advanced_searching_with_flags>
-        for (v, ch) in [
-            (self.has_indices, 'd'),
-            (self.global, 'g'),
-            (self.ignore_case, 'i'),
-            (self.multiline, 'm'),
-            (self.dot_all, 's'),
-            (self.unicode, 'u'),
-            (self.unicode_sets, 'v'),
-            (self.sticky, 'y'),
-        ] {
-            if v {
-                flags.push(ch);
-            }
-        }
-
-        write!(f, "{flags}")
-    }
-}
-
 impl<'a> Display for Pattern<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.body)

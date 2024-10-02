@@ -1,16 +1,17 @@
 mod parser;
 mod reader;
+mod span_factory;
 mod state;
 mod unicode;
 mod unicode_property;
 
-pub use parser::PatternParser;
+pub use parser::Parser;
 
 #[cfg(test)]
 mod test {
     use oxc_allocator::Allocator;
 
-    use crate::{ParserOptions, PatternParser};
+    use crate::{ParserOptions, Parser};
 
     #[test]
     fn should_pass() {
@@ -118,7 +119,7 @@ mod test {
             // (r"(?<year>[0-9]{4})-[0-9]{2}|[0-9]{2}-(?<year>[0-9]{4})", ParserOptions::default()),
             // (r"(?:(?<a>x)|(?<a>y))\k<a>", ParserOptions::default()),
         ] {
-            let res = PatternParser::new(&allocator, source_text, *options).parse();
+            let res = Parser::new(&allocator, source_text, *options).parse();
             if let Err(err) = res {
                 panic!("Failed to parse {source_text} with {options:?}\n💥 {err}");
             }
@@ -191,7 +192,7 @@ mod test {
                                                               // (r"(?<a>|(?<a>))", ParserOptions::default()), // Nested, still invalid
         ] {
             assert!(
-                PatternParser::new(&allocator, source_text, *options).parse().is_err(),
+                Parser::new(&allocator, source_text, *options).parse().is_err(),
                 "{source_text} should fail to parse with {options:?}!"
             );
         }
@@ -246,7 +247,7 @@ mod test {
             ),
         ] {
             assert_eq!(
-                PatternParser::new(&allocator, source_text, *options).parse().is_err(),
+                Parser::new(&allocator, source_text, *options).parse().is_err(),
                 *is_err,
                 "{source_text} should early error with {options:?}!"
             );
@@ -256,7 +257,7 @@ mod test {
     #[test]
     fn should_handle_empty() {
         let allocator = Allocator::default();
-        let pattern = PatternParser::new(&allocator, "", ParserOptions::default()).parse().unwrap();
+        let pattern = Parser::new(&allocator, "", ParserOptions::default()).parse().unwrap();
 
         assert_eq!(pattern.body.body[0].body.len(), 1);
     }
@@ -271,7 +272,7 @@ mod test {
             (ParserOptions::default().with_unicode_mode(), 14),
             (ParserOptions::default().with_unicode_sets_mode(), 14),
         ] {
-            let pattern = PatternParser::new(&allocator, source_text, *options).parse().unwrap();
+            let pattern = Parser::new(&allocator, source_text, *options).parse().unwrap();
             assert_eq!(pattern.body.body[0].body.len(), *expected);
         }
     }
