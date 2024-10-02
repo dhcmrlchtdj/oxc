@@ -482,10 +482,8 @@ mod test {
         (r"/\t\n\v\f\r/u", None),
         (r"/\p{L}/u", None),
         (r"/\d/g", None),
-        // Lose the flags ordering --
-        ("/abcd/igv", Some("/abcd/giv")),
-        (r"/\d/ug", Some(r"/\d/gu")),
-        // --
+        ("/abcd/igv", Some("/abcd/igv")),
+        (r"/\d/ug", Some(r"/\d/ug")),
         // we capitalize hex unicodes.
         (r"/\n\cM\0\x41\u{1f600}\./u", Some(r"/\n\cM\0\x41\u{1F600}\./u")),
         (r"/\u02c1/u", Some(r"/\u02C1/u")),
@@ -546,15 +544,30 @@ mod test {
         (r"/([\-a-z]{0,31})/iu", None),
     ];
 
-    fn test_display(allocator: &Allocator, (source, expect): &Case) {
-        let expect = expect.unwrap_or(source);
-        let actual = Parser::new(allocator, source, ParserOptions::default()).parse().unwrap();
-        assert_eq!(expect, actual.to_string());
-    }
-
     #[test]
-    fn test() {
+    fn test_display() {
         let allocator = &Allocator::default();
-        CASES.iter().for_each(|case| test_display(allocator, case));
+
+        for (input, output) in CASES {
+            let (left_slash, right_slash) = (input.find('/').unwrap(), input.rfind('/').unwrap());
+
+            let pattern = &input[left_slash + 1..right_slash];
+            let flags = &input[right_slash + 1..];
+
+            let actual = Parser::new(
+                allocator,
+                pattern,
+                ParserOptions {
+                    span_offset: 1,
+                    unicode_mode: flags.contains('u') || flags.contains('v'),
+                    unicode_sets_mode: flags.contains('v'),
+                },
+            )
+            .parse()
+            .unwrap();
+
+            let expect = output.unwrap_or(input);
+            assert_eq!(expect, format!("/{actual}/{flags}")); // This uses `Display` impls
+        }
     }
 }

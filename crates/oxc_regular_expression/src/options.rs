@@ -8,20 +8,3 @@ pub struct ParserOptions {
     pub unicode_sets_mode: bool,
     // TODO: Add `handle_escape_with_quote_type` like option to support `new RegExp("with \"escape\"")`
 }
-
-impl ParserOptions {
-    #[must_use]
-    pub fn with_span_offset(self, span_offset: u32) -> ParserOptions {
-        ParserOptions { span_offset, ..self }
-    }
-
-    #[must_use]
-    pub fn with_unicode_mode(self) -> ParserOptions {
-        ParserOptions { unicode_mode: true, ..self }
-    }
-
-    #[must_use]
-    pub fn with_unicode_sets_mode(self) -> ParserOptions {
-        ParserOptions { unicode_mode: true, unicode_sets_mode: true, ..self }
-    }
-}
