@@ -363,13 +363,13 @@ impl<'a> ParserImpl<'a> {
         pattern: &'a str,
         flags: RegExpFlags,
     ) -> Option<Box<'a, Pattern<'a>>> {
-        use oxc_regular_expression::{ParserOptions, PatternParser};
+        use oxc_regular_expression::{Parser, ParserOptions};
         let options = ParserOptions {
             span_offset,
             unicode_mode: flags.contains(RegExpFlags::U) || flags.contains(RegExpFlags::V),
             unicode_sets_mode: flags.contains(RegExpFlags::V),
         };
-        match PatternParser::new(self.ast.allocator, pattern, options).parse() {
+        match Parser::new(self.ast.allocator, pattern, options).parse() {
             Ok(regular_expression) => Some(self.ast.alloc(regular_expression)),
             Err(diagnostic) => {
                 self.error(diagnostic);
