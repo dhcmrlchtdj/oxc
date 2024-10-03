@@ -2,10 +2,7 @@ use std::{ops::ControlFlow, path::PathBuf};
 
 use oxc::{
     allocator::Allocator,
-    ast::{
-        ast::{Program, RegExpFlags},
-        Trivias,
-    },
+    ast::{ast::Program, Trivias},
     codegen::CodegenOptions,
     diagnostics::OxcDiagnostic,
     minifier::CompressOptions,

@@ -280,14 +280,21 @@ pub fn get_symbol_id_of_variable(
     reference.symbol_id()
 }
 
-pub fn extract_regex_flags<'a>(args: &'a oxc_allocator::Vec<'a, Argument<'a>>) -> &'a str {
+pub fn extract_regex_flags<'a>(
+    args: &'a oxc_allocator::Vec<'a, Argument<'a>>,
+) -> Option<RegExpFlags> {
     if args.len() <= 1 {
-        return "";
+        return None;
     }
     let Argument::StringLiteral(flag_arg) = &args[1] else {
-        return "";
+        return None;
     };
-    &flag_arg.value
+    let mut flags = RegExpFlags::empty();
+    for ch in flag_arg.value.chars() {
+        let flag = RegExpFlags::try_from(ch).ok()?;
+        flags |= flag;
+    }
+    Some(flags)
 }
 
 pub fn is_method_call<'a>(

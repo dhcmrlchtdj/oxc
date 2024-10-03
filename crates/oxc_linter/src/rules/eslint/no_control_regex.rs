@@ -1,8 +1,5 @@
 use oxc_allocator::Allocator;
-use oxc_ast::{
-    ast::{Argument, RegExpFlags},
-    AstKind,
-};
+use oxc_ast::{ast::Argument, AstKind};
 use oxc_diagnostics::OxcDiagnostic;
 use oxc_macros::declare_oxc_lint;
 use oxc_regular_expression::{
@@ -93,6 +90,7 @@ impl Rule for NoControlRegex {
                         // will be runtime errors, but are not covered by this rule.
                         let alloc = Allocator::default();
                         let flags = extract_regex_flags(&expr.arguments);
+                        let flags_text = flags.map_or(String::new(), |f| f.to_string());
                         let parser = Parser::new(
                             &alloc,
                             pattern.value.as_str(),
@@ -100,7 +98,7 @@ impl Rule for NoControlRegex {
                                 .with_span_offset(
                                     expr.arguments.first().map_or(0, |arg| arg.span().start),
                                 )
-                                .with_flags(flags),
+                                .with_flags(&flags_text),
                         );
 
                         let Ok(pattern) = parser.parse() else {
@@ -127,6 +125,7 @@ impl Rule for NoControlRegex {
                         // will be runtime errors, but are not covered by this rule.
                         let alloc = Allocator::default();
                         let flags = extract_regex_flags(&expr.arguments);
+                        let flags_text = flags.map_or(String::new(), |f| f.to_string());
                         let parser = Parser::new(
                             &alloc,
                             pattern.value.as_str(),
@@ -134,7 +133,7 @@ impl Rule for NoControlRegex {
                                 .with_span_offset(
                                     expr.arguments.first().map_or(0, |arg| arg.span().start),
                                 )
-                                .with_flags(flags),
+                                .with_flags(&flags_text),
                         );
 
                         let Ok(pattern) = parser.parse() else {
