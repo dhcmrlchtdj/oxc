@@ -33,7 +33,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse(&mut self) -> Result<ast::Pattern<'a>> {
+    pub fn parse(mut self) -> Result<ast::Pattern<'a>> {
         // Pre parse whole pattern to collect:
         // - the number of (named|unnamed) capturing groups
         //   - For `\1` in `\1()` to be handled as indexed reference
