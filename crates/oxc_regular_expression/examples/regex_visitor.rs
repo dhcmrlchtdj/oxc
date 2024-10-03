@@ -23,7 +23,7 @@ fn main() {
     let source_text = r"(https?:\/\/github\.com\/(([^\s]+)\/([^\s]+))\/([^\s]+\/)?(issues|pull)\/([0-9]+))|(([^\s]+)\/([^\s]+))?#([1-9][0-9]*)($|[\s\:\;\-\(\=])";
 
     let allocator = Allocator::default();
-    let mut parser = Parser::new(&allocator, source_text, ParserOptions::default());
+    let parser = Parser::new(&allocator, source_text, ParserOptions::default());
     let pattern = parser.parse().unwrap();
 
     let mut visitor = TestVisitor;

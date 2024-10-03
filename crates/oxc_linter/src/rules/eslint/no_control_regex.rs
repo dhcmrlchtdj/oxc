@@ -93,7 +93,7 @@ impl Rule for NoControlRegex {
                         // will be runtime errors, but are not covered by this rule.
                         let alloc = Allocator::default();
                         let flags = extract_regex_flags(&expr.arguments);
-                        let mut parser = Parser::new(
+                        let parser = Parser::new(
                             &alloc,
                             pattern.value.as_str(),
                             ParserOptions {
@@ -133,7 +133,7 @@ impl Rule for NoControlRegex {
                         // will be runtime errors, but are not covered by this rule.
                         let alloc = Allocator::default();
                         let flags = extract_regex_flags(&expr.arguments);
-                        let mut parser = Parser::new(
+                        let parser = Parser::new(
                             &alloc,
                             pattern.value.as_str(),
                             ParserOptions {

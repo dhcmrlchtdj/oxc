@@ -43,7 +43,7 @@ fn main() {
         (r"[\bb]", ""),
         (r"a{2,1}", "v"), // Error
     ] {
-        let mut parser = Parser::new(
+        let parser = Parser::new(
             &allocator,
             pattern,
             ParserOptions {
