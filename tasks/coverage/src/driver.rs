@@ -166,15 +166,11 @@ impl Driver {
                 continue;
             };
             let printed1 = pattern.to_string();
-            let flags = literal.regex.flags;
+            let flags = literal.regex.flags.to_string();
             let printed2 = match Parser::new(
                 &allocator,
                 &printed1,
-                ParserOptions {
-                    span_offset: 0,
-                    unicode_mode: flags.contains(RegExpFlags::U) || flags.contains(RegExpFlags::V),
-                    unicode_sets_mode: flags.contains(RegExpFlags::V),
-                },
+                ParserOptions::default().with_flags(&flags),
             )
             .parse()
             {

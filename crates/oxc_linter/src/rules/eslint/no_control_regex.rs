@@ -96,17 +96,11 @@ impl Rule for NoControlRegex {
                         let parser = Parser::new(
                             &alloc,
                             pattern.value.as_str(),
-                            ParserOptions {
-                                span_offset: expr
-                                    .arguments
-                                    .first()
-                                    .map_or(0, |arg| arg.span().start),
-                                unicode_mode: flags.is_some_and(|flags| {
-                                    flags.intersects(RegExpFlags::U | RegExpFlags::V)
-                                }),
-                                unicode_sets_mode: flags
-                                    .is_some_and(|flags| flags.contains(RegExpFlags::V)),
-                            },
+                            ParserOptions::default()
+                                .with_span_offset(
+                                    expr.arguments.first().map_or(0, |arg| arg.span().start),
+                                )
+                                .with_flags(flags),
                         );
 
                         let Ok(pattern) = parser.parse() else {
@@ -136,17 +130,11 @@ impl Rule for NoControlRegex {
                         let parser = Parser::new(
                             &alloc,
                             pattern.value.as_str(),
-                            ParserOptions {
-                                span_offset: expr
-                                    .arguments
-                                    .first()
-                                    .map_or(0, |arg| arg.span().start),
-                                unicode_mode: flags.is_some_and(|flags| {
-                                    flags.intersects(RegExpFlags::U | RegExpFlags::V)
-                                }),
-                                unicode_sets_mode: flags
-                                    .is_some_and(|flags| flags.contains(RegExpFlags::V)),
-                            },
+                            ParserOptions::default()
+                                .with_span_offset(
+                                    expr.arguments.first().map_or(0, |arg| arg.span().start),
+                                )
+                                .with_flags(flags),
                         );
 
                         let Ok(pattern) = parser.parse() else {

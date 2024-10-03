@@ -243,10 +243,8 @@ fn try_parse_pattern<'a>(
 ) -> Result<Pattern<'a>> {
     use oxc_regular_expression::{Parser, ParserOptions};
 
-    let options = ParserOptions {
-        span_offset: span.start + 1, // exclude `/`
-        unicode_mode: flags.contains(RegExpFlags::U) || flags.contains(RegExpFlags::V),
-        unicode_sets_mode: flags.contains(RegExpFlags::V),
-    };
+    let options = ParserOptions::default()
+        .with_span_offset(span.start + 1) // exclude `/`
+        .with_flags(&flags.to_string());
     Parser::new(ctx.ast.allocator, raw, options).parse()
 }

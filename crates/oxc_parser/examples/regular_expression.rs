@@ -85,11 +85,9 @@ impl<'a> Visit<'a> for RegularExpressionVisitor {
                 let parsed = RegExpParser::new(
                     &allocator,
                     pattern,
-                    RegExpParserOptions {
-                        span_offset: pattern_span.start + 1,
-                        unicode_mode: flags.contains('u') || flags.contains('v'),
-                        unicode_sets_mode: flags.contains('v'),
-                    },
+                    RegExpParserOptions::default()
+                        .with_span_offset(pattern_span.start + 1)
+                        .with_flags(flags),
                 )
                 .parse();
 
