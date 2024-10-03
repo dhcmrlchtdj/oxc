@@ -87,8 +87,8 @@ impl Rule for NoInvalidRegexp {
         }
 
         // Validate flags first if exists
-        let (mut u_flag_found, mut v_flag_found) = (false, false);
         if let Some((flags_span_start, flags_text)) = flags_arg {
+            let (mut u_flag_found, mut v_flag_found) = (false, false);
             let mut unique_flags = FxHashSet::default();
             for (idx, ch) in flags_text.char_indices() {
                 #[allow(clippy::cast_possible_truncation)]
@@ -129,11 +129,9 @@ impl Rule for NoInvalidRegexp {
         // e.g. `new RegExp(var)`, `RegExp("str" + var)`
         let allocator = Allocator::default();
         if let Some((pattern_span_start, pattern_text)) = pattern_arg {
-            let options = ParserOptions {
-                span_offset: pattern_span_start,
-                unicode_mode: u_flag_found || v_flag_found,
-                unicode_sets_mode: v_flag_found,
-            };
+            let options = ParserOptions::default()
+                .with_span_offset(pattern_span_start)
+                .with_flags(flags_arg.map_or("", |(_, flags_text)| flags_text));
 
             match Parser::new(&allocator, pattern_text, options).parse() {
                 Ok(_) => {}

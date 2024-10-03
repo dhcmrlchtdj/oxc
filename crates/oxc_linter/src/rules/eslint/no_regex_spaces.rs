@@ -108,7 +108,7 @@ impl NoRegexSpaces {
         let parser = Parser::new(
             &alloc,
             pattern.value.as_str(),
-            ParserOptions { span_offset: pattern.span.start + 1, ..ParserOptions::default() },
+            ParserOptions::default().with_span_offset(pattern.span.start + 1),
         );
         let parsed_pattern = parser.parse().ok()?;
 
