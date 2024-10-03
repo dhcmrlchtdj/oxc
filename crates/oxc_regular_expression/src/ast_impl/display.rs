@@ -557,11 +557,7 @@ mod test {
             let actual = Parser::new(
                 allocator,
                 pattern,
-                ParserOptions {
-                    span_offset: 1,
-                    unicode_mode: flags.contains('u') || flags.contains('v'),
-                    unicode_sets_mode: flags.contains('v'),
-                },
+                ParserOptions::default().with_span_offset(1).with_flags(flags),
             )
             .parse()
             .unwrap();
